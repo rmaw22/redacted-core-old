@@ -4,6 +4,8 @@ Removes secrets from tool output before your AI coding assistant reads it.
 
 ## What you see
 
+![Claude Code after a cat of .env: the hook reports three scrubbed secrets](docs/images/claude-code.png)
+
 Tool output:
 
 ```
@@ -20,16 +22,6 @@ DATABASE_URL=[REDACTED:database_url ...prod]
 AWS_ACCESS_KEY_ID=[REDACTED:aws_access_key ...0001]
 SMTP_PASS="[REDACTED:smtp_pass ...2024]"
 APP_NAME=myapp
-```
-
-What the assistant is told on a hit:
-
-```
-[redacted] 3 secret(s) scrubbed from command output: aws_access_key, database_url, smtp_pass
-
-- DATABASE_URL=[REDACTED:database_url ...prod]
-- AWS_ACCESS_KEY_ID=[REDACTED:aws_access_key ...0001]
-- SMTP_PASS="[REDACTED:smtp_pass ...2024]"
 ```
 
 ## Why
@@ -93,6 +85,7 @@ Other assistants, and whether their hooks can replace tool output, are listed un
 - A learned shape also matches a non-secret with the same prefix and similar length. Check the shape `init` shows before confirming.
 - With the heuristic on, a high-entropy identifier that mixes case and digits (some tool or request ids) may be redacted. The 4-character hint makes these easy to spot.
 - Every pattern scans the full output in turn, after a substring prefilter. Multi-megabyte output adds noticeable latency per call.
+- Commands typed at the Claude Code prompt with `!` are not tool calls. Their output reaches the model unscrubbed.
 
 ## Docs
 

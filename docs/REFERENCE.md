@@ -404,6 +404,7 @@ The command is passed to `bash -c` as one quoted word, so nothing in it can clos
 - A learned shape also matches a non-secret with the same prefix and similar length. Check the shape `init` shows before confirming.
 - With the heuristic on, a high-entropy identifier that mixes case and digits (some tool or request ids) may be redacted. The 4-character hint makes these easy to spot.
 - Every pattern scans the full output in turn, after a substring prefilter. Multi-megabyte output adds noticeable latency per call.
+- Commands typed at the Claude Code prompt with `!` are not tool calls. Their output reaches the model unscrubbed.
 
 ## Development
 
