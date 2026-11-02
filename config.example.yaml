@@ -31,7 +31,7 @@ pii:
   email: false
   phone: false
 
-# Turn off vendor or engine.yml patterns by name (see the README table).
+# Turn off vendor or engine.yml patterns by name (see the table in docs/REFERENCE.md).
 # No effect on learned secrets or the heuristic.
 whitelist:
   - jwt

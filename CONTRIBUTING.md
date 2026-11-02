@@ -56,3 +56,12 @@ Built-in patterns live in `src/engine.yml`, not in Rust.
 - Fill in `.github/pull_request_template.md`, including the linked issue.
 - CI (fmt, clippy, test, migration check) must pass.
 - A maintainer reviews and merges. External PRs need a maintainer approval.
+
+## Releasing
+
+Bump `version` in `Cargo.toml` to match the tag (it is what `--version` prints), then tag and push. The workflow fails if they differ. GoReleaser builds binaries for all platforms, creates the GitHub release and updates the Homebrew tap, then `cargo publish` pushes the crate to crates.io (needs the `CARGO_REGISTRY_TOKEN` secret).
+
+```bash
+git tag vX.Y.Z
+git push origin vX.Y.Z
+```
