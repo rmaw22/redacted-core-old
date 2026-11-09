@@ -1,24 +1,7 @@
-[package]
-name = "redacted-cli"
-version = "1.1.0"
-edition = "2024"
-description = "Claude Code PostToolUse hook that scrubs secrets from tool output"
-license = "MIT"
-repository = "https://github.com/svn-arv/redacted"
+[workspace]
+members = ["crates/redacted-core", "crates/redacted-cli"]
+resolver = "2"
 
-[[bin]]
-name = "redacted"
-path = "src/main.rs"
-
-[dependencies]
-clap = { version = "4", features = ["derive"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = { version = "1", features = ["arbitrary_precision"] }
-serde_yaml = "0.9"
-regex = "1"
-sha2 = "0.11"
-inquire = "0.9"
-
-[lints.clippy]
+[workspace.lints.clippy]
 cognitive_complexity = "warn"
 too_many_lines = "warn"

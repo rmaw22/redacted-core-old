@@ -8,8 +8,8 @@ use serde_json::Value;
 
 use crate::cli::Format;
 use crate::config::{self, Config, EngineConfig};
-use crate::scrub::Scrubber;
 use crate::{opencode, settings};
+use redacted_core::scrub::Scrubber;
 
 #[derive(Clone, Copy, PartialEq)]
 enum CheckStatus {

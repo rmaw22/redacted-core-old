@@ -4,6 +4,7 @@
 use sha2::{Digest, Sha256};
 
 use super::{ScrubResult, Scrubber, last_chars};
+use crate::config::LearnedSecret;
 
 impl Scrubber {
     /// Shapes first, then exact hashes on the rewritten text, so a span a shape
@@ -108,6 +109,66 @@ pub fn learned_value_hint(value: &str) -> Option<&str> {
         return None;
     }
     Some(last_chars(value, 4))
+}
+
+/// Turns a name and its secret value into a `LearnedSecret`: the value's sha256,
+/// its byte length and, for values with a literal prefix, a shape regex that also
+/// catches rotated keys. The raw value is never stored. Rejects values with
+/// whitespace or under eight characters.
+pub fn learn(key: &str, value: &str) -> Result<LearnedSecret, &'static str> {
+    if value.contains(char::is_whitespace) {
+        return Err("cannot match (contains spaces)");
+    }
+    if value.chars().count() < 8 {
+        return Err("too short");
+    }
+    Ok(LearnedSecret {
+        name: key.to_lowercase(),
+        sha256: sha256_hex(value),
+        byte_len: value.len(),
+        shape: derive_shape(value),
+    })
+}
+
+/// A regex for the value's shape: its literal prefix (ending at the last `_`/`-`
+/// in the first 13 chars) plus the character classes and a length window around
+/// the tail, so a rotated key of the same shape still matches. None when there is
+/// no short separated prefix or the tail holds non-token characters.
+pub fn derive_shape(sample: &str) -> Option<String> {
+    // Byte index of the 13th char, so the slice never splits a multi-byte char.
+    let head_end = sample
+        .char_indices()
+        .nth(12)
+        .map_or(sample.len(), |(i, _)| i);
+    let prefix_end = sample[..head_end].rfind(['_', '-'])? + 1;
+    let (prefix, rest) = sample.split_at(prefix_end);
+    if prefix.chars().count() < 3 || rest.is_empty() {
+        return None;
+    }
+    if !rest
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+    {
+        return None;
+    }
+    let charset: String = [
+        (rest.chars().any(|c| c.is_ascii_lowercase()), "a-z"),
+        (rest.chars().any(|c| c.is_ascii_uppercase()), "A-Z"),
+        (rest.chars().any(|c| c.is_ascii_digit()), "0-9"),
+        (rest.contains('_'), "_"),
+        (rest.contains('-'), "-"),
+    ]
+    .iter()
+    .filter(|(present, _)| *present)
+    .map(|(_, class)| *class)
+    .collect();
+    let rest_len = rest.chars().count();
+    Some(format!(
+        r"\b{}[{charset}]{{{},{}}}\b",
+        regex::escape(prefix),
+        rest_len.saturating_sub(4).max(1),
+        rest_len + 4
+    ))
 }
 
 /// Rewrites sorted, non-overlapping spans as learned markers.

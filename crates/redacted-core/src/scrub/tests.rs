@@ -617,14 +617,14 @@ fn learned_corpus_scrubber() -> (Scrubber, String, String) {
     let exact = fake_secrets::alnum(24);
     let shaped = format!("acme_{}aZ9", fake_secrets::alnum(27));
     let entries = vec![
-        crate::init::learn("DB_PASS", &exact).unwrap(),
-        crate::init::learn("ACME_KEY", &shaped).unwrap(),
-        crate::init::learn("STRIPE_KEY", &fake_secrets::stripe_key("sk_live_")).unwrap(),
-        crate::init::learn("GH_TOKEN", &fake_secrets::github_token("ghp_")).unwrap(),
-        crate::init::learn("SLACK_TOKEN", &fake_secrets::slack_token("xoxb")).unwrap(),
-        crate::init::learn("HUBSPOT_KEY", &fake_secrets::hubspot_pat("na1")).unwrap(),
-        crate::init::learn("AWS_KEY", &fake_secrets::aws_access_key()).unwrap(),
-        crate::init::learn(
+        crate::scrub::learn("DB_PASS", &exact).unwrap(),
+        crate::scrub::learn("ACME_KEY", &shaped).unwrap(),
+        crate::scrub::learn("STRIPE_KEY", &fake_secrets::stripe_key("sk_live_")).unwrap(),
+        crate::scrub::learn("GH_TOKEN", &fake_secrets::github_token("ghp_")).unwrap(),
+        crate::scrub::learn("SLACK_TOKEN", &fake_secrets::slack_token("xoxb")).unwrap(),
+        crate::scrub::learn("HUBSPOT_KEY", &fake_secrets::hubspot_pat("na1")).unwrap(),
+        crate::scrub::learn("AWS_KEY", &fake_secrets::aws_access_key()).unwrap(),
+        crate::scrub::learn(
             "DATABASE_URL",
             &fake_secrets::database_url("postgres", "db.example.com"),
         )

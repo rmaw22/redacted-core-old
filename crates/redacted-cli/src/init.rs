@@ -14,8 +14,8 @@ use serde_json::Value;
 
 use crate::cli::Format;
 use crate::config::{self, LearnedSecret};
-use crate::scrub::{learned_value_hint, percent_decode, sha256_hex};
 use crate::{opencode, settings};
+use redacted_core::scrub::{learn, learned_value_hint, percent_decode};
 
 /// Prompting happens only here and in the steps below; every function they call
 /// is tested without a TTY.
@@ -220,45 +220,6 @@ fn parse_dotenv(text: &str) -> Vec<(String, String)> {
     out
 }
 
-/// A literal prefix ending in the last `_`/`-` of the first 12 chars, 3+ chars long,
-/// plus the remainder's charset and a length band of ±4. None means exact hash only.
-fn derive_shape(sample: &str) -> Option<String> {
-    // Byte index of the 13th char, so the slice never splits a multi-byte char.
-    let head_end = sample
-        .char_indices()
-        .nth(12)
-        .map_or(sample.len(), |(i, _)| i);
-    let prefix_end = sample[..head_end].rfind(['_', '-'])? + 1;
-    let (prefix, rest) = sample.split_at(prefix_end);
-    if prefix.chars().count() < 3 || rest.is_empty() {
-        return None;
-    }
-    if !rest
-        .chars()
-        .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
-    {
-        return None;
-    }
-    let charset: String = [
-        (rest.chars().any(|c| c.is_ascii_lowercase()), "a-z"),
-        (rest.chars().any(|c| c.is_ascii_uppercase()), "A-Z"),
-        (rest.chars().any(|c| c.is_ascii_digit()), "0-9"),
-        (rest.contains('_'), "_"),
-        (rest.contains('-'), "-"),
-    ]
-    .iter()
-    .filter(|(present, _)| *present)
-    .map(|(_, class)| *class)
-    .collect();
-    let rest_len = rest.chars().count();
-    Some(format!(
-        r"\b{}[{charset}]{{{},{}}}\b",
-        regex::escape(prefix),
-        rest_len.saturating_sub(4).max(1),
-        rest_len + 4
-    ))
-}
-
 /// The password in `scheme://user:password@host`, percent-decoded.
 fn url_password(value: &str) -> Option<String> {
     let (_, after_scheme) = value.split_once("://")?;
@@ -286,22 +247,6 @@ fn with_url_passwords(pairs: Vec<(String, String)>) -> Vec<(String, String)> {
         }
     }
     out
-}
-
-/// Err is the reason the value cannot be learned, shown in the picker.
-pub fn learn(key: &str, value: &str) -> Result<LearnedSecret, &'static str> {
-    if value.contains(char::is_whitespace) {
-        return Err("cannot match (contains spaces)");
-    }
-    if value.chars().count() < 8 {
-        return Err("too short");
-    }
-    Ok(LearnedSecret {
-        name: key.to_lowercase(),
-        sha256: sha256_hex(value),
-        byte_len: value.len(),
-        shape: derive_shape(value),
-    })
 }
 
 /// Ticked by default when the config already holds the key or the value, else

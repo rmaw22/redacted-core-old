@@ -18,7 +18,7 @@ use crate::config::{Config, CustomPattern, EngineConfig, HeuristicConfig, PiiCon
 use go_regex::go_to_rust_regex;
 // Re-exported so callers write `scrub::sha256_hex`, not `scrub::learned::sha256_hex`.
 pub use guards::percent_decode;
-pub use learned::{learned_value_hint, sha256_hex};
+pub use learned::{derive_shape, learn, learned_value_hint, sha256_hex};
 
 const BUILTIN_ENGINE_YML: &str = include_str!("engine.yml");
 

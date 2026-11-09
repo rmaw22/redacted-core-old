@@ -2,6 +2,7 @@
 
 use super::*;
 use crate::config::LearnedSecret;
+use redacted_core::scrub::{derive_shape, learn};
 use std::fs;
 use std::path::PathBuf;
 
@@ -166,7 +167,7 @@ fn learn_hashes_the_value_and_lowercases_the_name() {
     let value = format!("sk_live_{}", "Ab1".repeat(8));
     let learned = learn("STRIPE_KEY", &value).unwrap();
     assert_eq!(learned.name, "stripe_key");
-    assert_eq!(learned.sha256, crate::scrub::sha256_hex(&value));
+    assert_eq!(learned.sha256, redacted_core::scrub::sha256_hex(&value));
     assert_eq!(learned.byte_len, value.len());
     assert_eq!(learned.shape, derive_shape(&value));
 }

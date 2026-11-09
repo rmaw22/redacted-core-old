@@ -1,0 +1,27 @@
+[package]
+name = "redacted-cli"
+version = "1.1.0"
+edition = "2024"
+description = "Claude Code PostToolUse hook that scrubs secrets from tool output"
+license = "MIT"
+repository = "https://github.com/rmaw22/redacted-core"
+
+[[bin]]
+name = "redacted"
+path = "src/main.rs"
+
+[dependencies]
+redacted-core = { path = "../redacted-core" }
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["arbitrary_precision"] }
+serde_yaml = "0.9"
+inquire = "0.9"
+
+[dev-dependencies]
+# Tests reuse core's decoy generators, and one test compiles a derived shape regex.
+redacted-core = { path = "../redacted-core", features = ["test-support"] }
+regex = "1"
+
+[lints]
+workspace = true

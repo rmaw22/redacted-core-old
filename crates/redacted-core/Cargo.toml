@@ -1,0 +1,24 @@
+[package]
+name = "redacted-core"
+version = "1.1.0"
+edition = "2024"
+description = "Pure secret-detection engine shared by the redacted CLI and browser extension"
+license = "MIT"
+repository = "https://github.com/rmaw22/redacted-core"
+
+[dependencies]
+regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0.9"
+sha2 = "0.11"
+
+[dev-dependencies]
+# Used only by the benchmark test harness to serialize payloads.
+serde_json = "1"
+
+[features]
+# Exposes `fake_secrets` (decoy generators) to downstream test code.
+test-support = []
+
+[lints]
+workspace = true

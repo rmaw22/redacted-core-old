@@ -18,7 +18,7 @@ jobs:
 
       - name: Check Cargo.toml version matches the tag
         run: |
-          version=$(sed -nE 's/^version = "(.*)"$/\1/p' Cargo.toml | head -1)
+          version=$(sed -nE 's/^version = "(.*)"$/\1/p' crates/redacted-cli/Cargo.toml | head -1)
           test "v$version" = "$GITHUB_REF_NAME" || { echo "Cargo.toml is $version, tag is $GITHUB_REF_NAME"; exit 1; }
 
       - uses: dtolnay/rust-toolchain@stable
