@@ -32,12 +32,9 @@ fn run_redacted(dir: &Path, args: &[&str], stdin: &str) -> Output {
         .stderr(Stdio::piped())
         .spawn()
         .unwrap();
-    child
-        .stdin
-        .take()
-        .unwrap()
-        .write_all(stdin.as_bytes())
-        .unwrap();
+    // A test that makes the child exit early (e.g. a parse error) closes its stdin
+    // before we finish writing; a BrokenPipe here is expected, not a failure.
+    let _ = child.stdin.take().unwrap().write_all(stdin.as_bytes());
     child.wait_with_output().unwrap()
 }
 
